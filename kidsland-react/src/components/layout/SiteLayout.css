@@ -1,0 +1,248 @@
+.site-layout {
+  min-height: 100vh;
+  color: var(--color-text-strong);
+}
+
+.site-header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid;
+  box-shadow: 0 22px 40px rgba(6, 40, 18, 0.08);
+}
+
+.site-header--home {
+  border-color: rgba(242, 237, 194, 0.4);
+  background: rgba(242, 237, 194, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.site-header--inner {
+  border-color: rgba(242, 237, 194, 0.4);
+  background: rgba(242, 237, 194, 0.16);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+.site-header__logo-link {
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.site-header__logo-link:hover {
+  transform: scale(1.03);
+}
+
+.site-header__logo {
+  display: block;
+  height: clamp(2.55rem, 4vw, 3.8rem);
+  width: auto;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.site-nav__icons {
+  display: inline-flex;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
+  align-items: center;
+}
+
+.site-nav__icon,
+.contact-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: var(--green-dark);
+  color: #fff;
+  text-decoration: none;
+}
+
+.contact-social svg,
+.site-nav__icon svg,
+.site-footer__link svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 9999px;
+  border: 2px solid var(--color-surface-soft);
+  background: rgba(121, 174, 111, 0.92);
+  padding: 0.35rem 1rem;
+  color: var(--color-surface-soft);
+  line-height: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(52, 103, 57, 0.25);
+  transition: all 0.3s ease;
+}
+
+.site-nav__link:hover {
+  transform: translateY(-2px);
+  background: var(--color-primary);
+}
+
+.site-nav__link--active {
+  background: var(--color-primary);
+}
+
+.site-main {
+  padding-top: 0;
+  padding-bottom: 5rem;
+}
+
+/* Header scrolled state */
+.site-header--scrolled {
+  background: var(--bg-page);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  border-bottom: 0;
+}
+
+.site-main--inner {
+  padding-top: 4.5rem;
+}
+
+.site-header--home {
+  border-color: rgba(242, 237, 194, 0.15);
+  background: rgba(242, 237, 194, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.site-header__inner {
+  background: rgba(242, 237, 194, 0.06);
+}
+
+.site-footer {
+  margin-top: 2rem;
+  background: #132a09;
+  color: #fff;
+  padding-bottom: 5rem;
+}
+
+.site-footer__inner {
+  display: grid;
+  gap: 2rem;
+  padding-top: 2.5rem;
+  padding-bottom: 5rem;
+  color: var(--color-text-soft);
+  font-size: 0.875rem;
+}
+
+.site-footer__brand {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.site-footer__text {
+  margin-top: 0.75rem;
+  max-width: 32rem;
+  line-height: 1.65;
+}
+
+.site-footer__text--tight {
+  margin-top: 0.35rem;
+}
+
+.site-footer__heading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--yellow);
+}
+
+.site-footer__list {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.site-footer__link {
+  transition: color 0.25s ease;
+}
+
+.site-footer__link { color: #fff; }
+.site-footer__link:hover { color: var(--yellow); }
+
+.site-footer__bottom {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.site-footer__copyright {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.site-footer__policy-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .site-header__inner {
+    gap: 0.65rem;
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+  }
+
+  .site-header__logo {
+    height: clamp(2.7rem, 4.2vw, 4rem);
+  }
+
+  .site-nav {
+    gap: 0.35rem;
+  }
+
+  .site-nav__link {
+    font-size: 0.88rem;
+    padding: 0.38rem 1.05rem;
+  }
+
+  .site-main--inner {
+    padding-top: 5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-header__logo {
+    transform: none;
+    transform-origin: left center;
+  }
+
+  .site-footer__inner {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}

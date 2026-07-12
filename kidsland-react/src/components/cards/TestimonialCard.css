@@ -1,0 +1,21 @@
+.testimonial-card {
+  border-radius: 1.75rem;
+  border: 1px solid var(--color-surface-soft);
+  background: var(--color-surface-soft);
+  box-shadow: 0 14px 36px rgba(52, 103, 57, 0.1);
+  padding: 1.25rem;
+}
+
+.testimonial-card__quote {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--color-text-soft);
+}
+
+.testimonial-card__author {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+

@@ -1,0 +1,229 @@
+[
+  {
+    "intent": "BIAYA",
+    "kategori": "FAQ",
+    "keywords": [
+      "biaya",
+      "tarif",
+      "harga",
+      "bayar",
+      "💰"
+    ],
+    "response": "Biaya kegiatan Kidsland Membumi berkisar Rp35.000-Rp40.000 per sesi tergantung aktivitas yang dilaksanakan."
+  },
+  {
+    "intent": "JADWAL",
+    "kategori": "FAQ",
+    "keywords": [
+      "jadwal",
+      "hari",
+      "kapan",
+      "📅"
+    ],
+    "response": "Kegiatan biasanya dilaksanakan pada akhir pekan atau di hari libur tertentu untuk informasi terkini silahkan cek melalui Instagram resmi kami @kidslandmembumi"
+  },
+  {
+    "intent": "KELAS_AWAN",
+    "kategori": "FAQ",
+    "keywords": [
+      "kelas awan",
+      "awan"
+    ],
+    "response": "Kelas Awan diperuntukkan bagi anak usia 3-6 tahun."
+  },
+  {
+    "intent": "KELAS_BUMI",
+    "kategori": "FAQ",
+    "keywords": [
+      "kelas bumi",
+      "bumi"
+    ],
+    "response": "Kelas Bumi diperuntukkan bagi anak usia 7-10 tahun."
+  },
+  {
+    "intent": "LOKASI",
+    "kategori": "FAQ",
+    "keywords": [
+      "lokasi",
+      "tempat",
+      "alamat",
+      "dimana",
+      "📍"
+    ],
+    "response": "Kidsland Membumi berlokasi di Jl. Raya Bojonggenteng No 3 Kabupaten Sukabumi, Lokasi kami tepat di Café Bumi Awang samping IDCloudhost"
+  },
+  {
+    "intent": "PENDAFTARAN",
+    "kategori": "FAQ",
+    "keywords": [
+      "pendaftaran",
+      "daftar",
+      "cara daftar",
+      "join"
+    ],
+    "response": "Untuk informasi pendaftaran silahkan login terlebih dahulu di menu daftar sekarang"
+  },
+  {
+    "intent": "PRIVAT",
+    "kategori": "FAQ",
+    "keywords": [
+      "privat",
+      "private"
+    ],
+    "response": "Private class dapat dilakukan dengan minimal 20 peserta."
+  },
+  {
+    "intent": "PROGRAM",
+    "kategori": "FAQ",
+    "keywords": [
+      "program",
+      "kegiatan",
+      "🌿"
+    ],
+    "response": "Kidsland membumi merupakan ruang belajar dan bermain untuk anak yang mengusung konsep pembelajaran berbasis pengalaman (experiential learning). Anak diajak untuk belajar melalui bermain, eksplorasi alam, aktivitas kreatif, kegiatan sensorik, serta interaksi sosial yang menyenangkan sesuai dengan usia dan minat anak."
+  },
+  {
+    "intent": "SISTEM",
+    "kategori": "FAQ",
+    "keywords": [
+      "sistem",
+      "pendampingan",
+      "fasilitator",
+      "belajar"
+    ],
+    "response": "Anak belajar sambil bermain dengan pendampingan fasilitator melalui aktivitas terstruktur."
+  },
+  {
+    "intent": "USIA",
+    "kategori": "FAQ",
+    "keywords": [
+      "usia",
+      "umur",
+      "minimal",
+      "maksimal",
+      "👶"
+    ],
+    "response": "Kidsland Membumi dapat diikuti anak usia 3-10 tahun."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "tanaman",
+      "berkebun",
+      "tumbuhan"
+    ],
+    "response": "Halo Kak! Aktivitas Berkebun Mini (seperti menyemai biji atau merawat tanaman pot) sangat kami rekomendasikan. Ini melatih fungsi eksekutif anak seperti kesabaran dan rasa tanggung jawab, sekaligus mengasah motorik kasar dan halusnya saat bersentuhan dengan tanah dan air."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "air",
+      "water play",
+      "berenang"
+    ],
+    "response": "Halo Kak! Jika anak suka bermain air, aktivitas Eksperimen Water Play (seperti mencampur warna) sangat direkomendasikan. Kegiatan ini sangat seru dan efektif menstimulasi integrasi sensorik, melatih motorik halus saat memeras atau menuang, serta mengenalkan konsep dasar sains sejak dini."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "mewarnai",
+      "warna"
+    ],
+    "response": "Halo Kak! Aktivitas Finger Painting dengan pewarna aman sangat kami rekomendasikan. Selain menyenangkan, bersentuhan langsung dengan cat akan memperkuat saraf taktil di ujung jari dan melatih kesiapan otot tangan anak secara optimal tanpa batasan alat bantu."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "mandiri",
+      "sendiri"
+    ],
+    "response": "Halo Kak! Untuk memupuk kemandirian, aktivitas Practical Life ala Montessori (seperti menyiapkan camilan sendiri atau melipat baju) sangat pas. Ini memberikan anak rasa otonomi, melatih pengambilan keputusan, dan membangun pondasi kepercayaan diri yang kuat melalui pencapaian nyata."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "pemalu",
+      "pendiam"
+    ],
+    "response": "Aktivitas kelompok kecil direkomendasikan."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "kerajinan",
+      "karya",
+      "seni",
+      "loose parts"
+    ],
+    "response": "Halo Kak! Untuk anak yang suka kerajinan, membuat Kreasi Loose Parts dari bahan alam atau barang bekas adalah pilihan tepat. Ini tidak hanya menyenangkan, tapi sangat baik melatih koordinasi mata-tangan dan kelenturan jari (pincer grasp) yang krusial untuk persiapan menulis, sekaligus memantik imajinasi spasialnya."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "lumpur",
+      "kotor"
+    ],
+    "response": "Aktivitas alam direkomendasikan."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "menggambar",
+      "lukis"
+    ],
+    "response": "Halo Kak! Melukis Bebas di kanvas besar atau kertas dinding bisa jadi pilihan seru. Ini memfasilitasi ekspresi emosi anak tanpa batas aturan, sekaligus memperkuat otot-otot lengan (motorik kasar) sebelum ia nantinya berfokus pada motorik halus untuk menulis."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "lumpur",
+      "kotor"
+    ],
+    "response": "Halo Kak! Anak yang suka bermain lumpur bisa diarahkan ke aktivitas Messy Play. Ini sangat bagus karena merangsang sistem taktil dan propioseptif secara maksimal. Bermain kotor-kotoran di alam juga terbukti efektif untuk meregulasi emosi anak (grounding) dan melatih keberaniannya bereksplorasi."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "alam",
+      "scavenger"
+    ],
+    "response": "Halo Kak! Bermain Nature Scavenger Hunt (Berburu Harta Karun Alam) sangat cocok! Bergerak bebas menyusuri alam merangsang kecerdasan naturalis anak, memperkuat keseimbangan inti tubuh (core balance), dan melatih ketangkasan motorik kasarnya di medan yang bervariasi."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "aktif",
+      "bergerak"
+    ],
+    "response": "Halo Kak! Untuk anak yang sangat aktif, membuat arena Obstacle Course di rumah atau halaman sangat disarankan. Permainan ini menyalurkan energi tinggi mereka ke dalam aktivitas terstruktur yang melatih regulasi diri, kelincahan, keseimbangan, serta kemampuan memproses instruksi."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "aktif",
+      "bergerak"
+    ],
+    "response": "Aktivitas motorik kasar direkomendasikan."
+  },
+  {
+    "intent": "REKOMENDASI",
+    "kategori": "REKOMENDASI",
+    "keywords": [
+      "pemalu",
+      "pendiam"
+    ],
+    "response": "Halo Kak! Untuk anak yang pemalu, Proyek Seni Kolaboratif (seperti membuat mural kecil atau blok bangunan bersama) sangat cocok. Aktivitas ini memindahkan fokus dari interaksi sosial langsung ke objek yang sedang dikerjakan, sehingga perlahan menurunkan kecemasan dan membantunya belajar bekerja sama secara natural."
+  }
+]

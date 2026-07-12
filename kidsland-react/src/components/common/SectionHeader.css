@@ -1,0 +1,36 @@
+.section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.section-header__eyebrow {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--color-primary);
+}
+
+.section-header__title {
+  margin-top: 0.75rem;
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: var(--color-text-strong);
+  line-height: 1.1;
+}
+
+.section-header__lead {
+  margin-top: 1.25rem;
+  max-width: 48rem;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #fff9e6;
+}
+
+@media (min-width: 640px) {
+  .section-header__title {
+    font-size: 3rem;
+  }
+}

@@ -1,0 +1,71 @@
+.featured-program-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(159, 203, 152, 0.3);
+  background: var(--color-surface-soft);
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.featured-program-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(52, 103, 57, 0.12);
+}
+
+.featured-program-card__badge {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-primary);
+}
+
+.featured-program-card__title {
+  margin: 0;
+  font-family: "Baloo 2", "Fredoka", "Outfit", sans-serif;
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-text-strong);
+}
+
+.featured-program-card__age-range {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.featured-program-card__benefit {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-text-soft);
+}
+
+.featured-program-card__cta {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: transform 0.25s ease;
+}
+
+.featured-program-card__cta:hover {
+  transform: translateX(4px);
+}
+
+@media (min-width: 640px) {
+  .featured-program-card {
+    padding: 1.5rem;
+  }
+
+  .featured-program-card__title {
+    font-size: 1.25rem;
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "kidsland-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix kidsland-react run dev",
+    "build": "npm --prefix kidsland-react run build",
+    "preview": "npm --prefix kidsland-react run preview"
+  }
+}

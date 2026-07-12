@@ -1,0 +1,85 @@
+.pendaftaran-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  background: #f4f7ef;
+}
+
+.pendaftaran-back-btn {
+  position: fixed;
+  top: 95px;
+  left: 20px;
+  z-index: 9999;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 20px;
+
+  background: #4f8a49;
+  color: #ffffff;
+
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: 600;
+
+  box-shadow: 0 5px 15px rgba(79, 138, 73, 0.25);
+  transition: all 0.25s ease;
+}
+
+.pendaftaran-back-btn:hover {
+  background: #5f9e58;
+  transform: translateY(-2px);
+}
+
+.pendaftaran-card {
+  width: 450px;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pendaftaran-card h1 {
+  text-align: center;
+  color: #4e7d2f;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.btn-daftar {
+  width: 100%;
+  padding: 12px;
+  background: #6aa84f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.btn-daftar:hover {
+  background: #5b9442;
+}
