@@ -6,3 +6,4 @@ scikit-learn
 gunicorn
 google-generativeai
 python-dotenv
+nltk
