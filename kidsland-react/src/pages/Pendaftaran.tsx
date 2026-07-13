@@ -31,9 +31,9 @@ export default function Pendaftaran() {
     checkStatusSesi();
   }, []);
 
-  const handleDaftar = async () => {
+const handleDaftar = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/pendaftaran", {
+      const response = await fetch("https://kidsland-membumi-production.up.railway.app/pendaftaran", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -57,8 +57,8 @@ export default function Pendaftaran() {
         setNoHp("");
         setMinat("");
         
-        // Memuat ulang status setelah mendaftar untuk mengecek apakah kuota langsung penuh
-        const refreshResponse = await fetch("http://127.0.0.1:5000/sesi");
+        // Memuat ulang status (GANTI URL DI SINI JUGA)
+        const refreshResponse = await fetch("https://kidsland-membumi-production.up.railway.app/sesi");
         const refreshData = await refreshResponse.json();
         const sesiAktif = refreshData.find((sesi: any) => sesi.status === "buka");
         setIsBuka(!!sesiAktif);
@@ -67,7 +67,7 @@ export default function Pendaftaran() {
       alert("Gagal terhubung ke server");
       console.log(error);
     }
-  }; 
+  };
   
   return (
     // Penambahan paddingTop memastikan form berada di bawah header fixed
