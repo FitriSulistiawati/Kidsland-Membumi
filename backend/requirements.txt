@@ -7,3 +7,4 @@ gunicorn
 google-generativeai
 python-dotenv
 nltk
+psycopg2-binary
