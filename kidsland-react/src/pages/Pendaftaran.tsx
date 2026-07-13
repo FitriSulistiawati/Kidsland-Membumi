@@ -15,7 +15,7 @@ export default function Pendaftaran() {
   useEffect(() => {
     const checkStatusSesi = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/sesi");
+        const response = await fetch("https://kidsland-membumi-production.up.railway.app/sesi");
         const data = await response.json();
         
         // Cek apakah ada setidaknya satu sesi yang berstatus 'buka'
