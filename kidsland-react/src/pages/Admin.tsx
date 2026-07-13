@@ -36,13 +36,28 @@ export default function Admin() {
   useEffect(() => { fetchData(); }, []);
 
   const handleSimpan = async () => {
+  try {
     const res = await fetch(`${API_URL}/sesi/${sesi.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sesi)
+      body: JSON.stringify({
+        nama_sesi: sesi.nama_sesi,
+        tanggal_kelas: sesi.tanggal_kelas,
+        kuota: Number(sesi.kuota),
+        status: sesi.status // Pastikan nilai ini dikirim dengan benar ("buka" atau "tutup")
+      })
     });
-    if (res.ok) { alert("Berhasil disimpan"); fetchData(); }
-  };
+
+    if (res.ok) {
+      alert("Berhasil disimpan");
+      fetchData(); // Memanggil ulang data agar tampilan sinkron dengan database
+    } else {
+      alert("Gagal menyimpan perubahan");
+    }
+  } catch (err) {
+    console.error("Error saving:", err);
+  }
+};
 
   const handleHapus = async (id: number) => {
     if (!window.confirm("Yakin ingin menghapus data ini?")) return;

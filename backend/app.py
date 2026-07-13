@@ -59,8 +59,12 @@ def update_sesi(id):
     data = request.get_json()
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("UPDATE sesi_kelas SET nama_sesi=%s, tanggal_kelas=%s, kuota=%s, status=%s WHERE id=%s", 
-                (data['nama_sesi'], data['tanggal_kelas'], data['kuota'], data['status'], id))
+    # Pastikan query ini menangkap semua field yang dikirim dari frontend
+    cur.execute("""
+        UPDATE sesi_kelas 
+        SET nama_sesi=%s, tanggal_kelas=%s, kuota=%s, status=%s 
+        WHERE id=%s
+    """, (data['nama_sesi'], data['tanggal_kelas'], data['kuota'], data['status'], id))
     conn.commit()
     cur.close(); conn.close()
     return jsonify({"message": "Berhasil"})
