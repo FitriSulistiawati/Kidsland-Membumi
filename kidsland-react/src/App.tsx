@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { SiteLayout } from "./components";
 import HomePage from "./pages/HomePage";
@@ -7,7 +8,7 @@ import Login from "./pages/Login";
 import Chatbot from "./components/chatbot";
 
 // Komponen untuk melindungi rute admin
-const ProtectedRoute = ({ children }: { children: any }) => {
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   if (!isAdmin) {
     return <Navigate to="/login" replace />;

@@ -33,7 +33,12 @@ export default function Admin() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    const init = async () => {
+      await fetchData();
+    };
+    void init();
+  }, []);
 
   const handleSimpan = async () => {
   try {
