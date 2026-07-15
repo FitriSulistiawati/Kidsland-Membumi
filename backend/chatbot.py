@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(
 
 csv_path = os.path.join(
     BASE_DIR,
-    "Dataset_Kidsland_Skripsi_Final.csv"
+    "Kidsland_Dataset_fiks.csv"
 )
 
 df = pd.read_csv(
