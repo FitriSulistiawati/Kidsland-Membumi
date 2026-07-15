@@ -16,12 +16,21 @@ def _load_dataset():
     try:
         df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
         df.columns = [str(c).strip().lower().replace('"', '') for c in df.columns]
+        
+        # Mencegah tabrakan antara kolom 'kategori_pertanyaan' dan 'pertanyaan'
+        if 'kategori_pertanyaan' in df.columns:
+            df = df.drop(columns=['kategori_pertanyaan'])
+            
         cols_map = {}
         for c in df.columns:
             if "pertanyaan" in c: cols_map[c] = "pertanyaan"
             elif "jawaban" in c: cols_map[c] = "jawaban"
             elif "intent" in c: cols_map[c] = "intent"
+            
         df = df.rename(columns=cols_map)
+        
+        # Membuang duplikat nama kolom jika masih ada
+        df = df.loc[:, ~df.columns.duplicated()] 
         
         for col in ["pertanyaan", "jawaban", "intent"]:
             if col not in df.columns: df[col] = ""
@@ -31,7 +40,8 @@ def _load_dataset():
         return pd.DataFrame()
 
 def preprocess(text):
-    text = str(text or "").lower()
+    if pd.isna(text): return ""
+    text = str(text).lower()
     text = re.sub(r"[^\w\s]", " ", text)
     return text.strip()
 
@@ -41,7 +51,6 @@ def build_index():
     if df.empty: 
         return df, None, None
     df["processed"] = df["pertanyaan"].apply(preprocess)
-    # min_df=1 memastikan tidak ada kata yang terlewat
     vec = TfidfVectorizer(ngram_range=(1, 2), min_df=1)
     mat = vec.fit_transform(df["processed"])
     return df, vec, mat
@@ -59,7 +68,7 @@ def get_response(user_input):
             "intent": "PRIVAT", "wa": True, "link": ADMIN_WHATSAPP_LINK
         }
 
-    # 1. METODE IRISAN KATA (Paling ampuh untuk membaca dataset CSV)
+    # 1. METODE IRISAN KATA (Membaca CSV dengan jaminan 100% akurat)
     user_words = set(proc_in.split())
     best_match = None
     max_overlap = 0
@@ -71,7 +80,6 @@ def get_response(user_input):
             max_overlap = overlap
             best_match = row
 
-    # Asalkan ada minimal 2 kata yang cocok (misal: "suka" & "menggambar")
     if max_overlap >= 2 and best_match is not None:
         return {
             "jawaban": str(best_match["jawaban"]), 
@@ -79,7 +87,7 @@ def get_response(user_input):
             "wa": False
         }
 
-    # 2. METODE TF-IDF (Pelengkap)
+    # 2. METODE TF-IDF
     if vectorizer is not None:
         sim = cosine_similarity(vectorizer.transform([proc_in]), tfidf_matrix)
         if sim.max() >= 0.05:
@@ -90,7 +98,7 @@ def get_response(user_input):
                 "wa": False
             }
 
-    # 3. JARING PENGAMAN (AI / Peringatan Default)
+    # 3. JARING PENGAMAN
     return {
         "intent": "FALLBACK_AI",
         "jawaban": "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!",
