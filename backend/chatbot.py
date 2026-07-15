@@ -14,12 +14,8 @@ DATASET_PATH = os.path.join(BASE_DIR, "Kidsland_Dataset_Fiks.csv")
 ADMIN_WHATSAPP_LINK = "https://wa.me/6285117568551"
 REDIRECT_INTENTS = {"PRIVAT"}
 WA_KEYWORDS = {
-    "privat",
-    "kelas privat",
-    "private",
-    "booking privat",
-    "daftar privat",
-    "reservasi privat",
+    "privat", "kelas privat", "private", "booking privat", 
+    "daftar privat", "reservasi privat",
 }
 
 def _ensure_stopwords():
@@ -36,7 +32,7 @@ STOP_WORDS = _ensure_stopwords()
 
 def _load_dataset():
     if not os.path.exists(DATASET_PATH):
-        raise FileNotFoundError(f"Dataset tidak ditemukan: {DATASET_PATH}")
+        return pd.DataFrame()
 
     try:
         df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
@@ -174,7 +170,7 @@ def get_response(user_input):
     best_score = float(similarity.max())
 
     row = None
-    if best_score >= 0.05:
+    if best_score >= 0.01:
         row = data.iloc[best_match]
     else:
         row = keyword_fallback(user_input, data)
@@ -186,10 +182,9 @@ def get_response(user_input):
                 "wa": True,
                 "link": ADMIN_WHATSAPP_LINK,
             }
-        # Meneruskan pertanyaan bebas ke AI
         return {
-            "intent": "REKOMENDASI",
-            "jawaban": "Sedang memproses...",
+            "intent": "FALLBACK_AI",
+            "jawaban": "Tunggu sebentar ya kak, sedang mencari referensi terbaik...",
             "wa": False,
         }
 

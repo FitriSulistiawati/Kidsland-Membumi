@@ -1,20 +1,14 @@
 import os
+import traceback
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from chatbot import get_response
 
-try:
-    from gemini_helper import generate_activity_recommendation
-except Exception:
-    def generate_activity_recommendation(_user_message, _fallback):
-        return _fallback
-
 app = Flask(__name__)
 CORS(app)
 
-# Fungsi koneksi PostgreSQL menggunakan DATABASE_URL dari Railway
 def get_db_connection():
     return psycopg2.connect(os.environ.get("DATABASE_URL"), cursor_factory=RealDictCursor)
 
@@ -27,10 +21,19 @@ def chat():
     data = request.get_json()
     user_message = data.get("message", "")
     result = get_response(user_message)
-    if result.get("intent") == "REKOMENDASI":
+    
+    if result.get("intent") == "FALLBACK_AI":
         try:
-            result["jawaban"] = generate_activity_recommendation(user_message, result["jawaban"])
-        except: pass
+            from gemini_helper import generate_activity_recommendation
+            ai_answer = generate_activity_recommendation(user_message, result["jawaban"])
+            result["jawaban"] = ai_answer
+        except Exception as e:
+            print(f"Error Gemini: {e}")
+            traceback.print_exc()
+            result["jawaban"] = "Maaf kak, pertanyaan ini belum ada di sistem dan AI sedang sibuk. Silakan hubungi admin via WhatsApp."
+            
+        result["intent"] = "UMUM"
+        
     return jsonify(result)
 
 @app.route("/pendaftaran", methods=["POST"])
@@ -64,7 +67,6 @@ def update_sesi(id):
     data = request.get_json()
     conn = get_db_connection()
     cur = conn.cursor()
-    # Pastikan query ini menangkap semua field yang dikirim dari frontend
     cur.execute("""
         UPDATE sesi_kelas 
         SET nama_sesi=%s, tanggal_kelas=%s, kuota=%s, status=%s 
