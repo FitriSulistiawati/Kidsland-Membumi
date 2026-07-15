@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Pendaftaran.css";
 
+interface SesiStatus {
+  status: string;
+}
+
 export default function Pendaftaran() {
   const [namaAnak, setNamaAnak] = useState("");
   const [usia, setUsia] = useState("");
@@ -16,10 +20,10 @@ export default function Pendaftaran() {
     const checkStatusSesi = async () => {
       try {
         const response = await fetch("https://kidsland-membumi-production.up.railway.app/sesi");
-        const data = await response.json();
+        const data: SesiStatus[] = await response.json();
         
         // Cek apakah ada setidaknya satu sesi yang berstatus 'buka'
-        const sesiAktif = data.find((sesi: any) => sesi.status === "buka");
+        const sesiAktif = data.find((sesi) => sesi.status === "buka");
         setIsBuka(!!sesiAktif);
       } catch (error) {
         console.error("Gagal mengambil status sesi", error);
@@ -59,8 +63,8 @@ const handleDaftar = async () => {
         
         // Memuat ulang status (GANTI URL DI SINI JUGA)
         const refreshResponse = await fetch("https://kidsland-membumi-production.up.railway.app/sesi");
-        const refreshData = await refreshResponse.json();
-        const sesiAktif = refreshData.find((sesi: any) => sesi.status === "buka");
+        const refreshData: SesiStatus[] = await refreshResponse.json();
+        const sesiAktif = refreshData.find((sesi) => sesi.status === "buka");
         setIsBuka(!!sesiAktif);
       }
     } catch (error) {

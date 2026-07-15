@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import heroSlide1 from "../assets/hero section 1.jpeg";
 import heroSlide2 from "../assets/hero section 2.jpeg";
 import heroSlide3 from "../assets/hero section 3.jpeg";
@@ -9,7 +9,7 @@ import teamMember2 from "../assets/foto 4.jpeg";
 import ifa from "../assets/ifa.jpeg";
 import nanda from "../assets/nanda.jpeg";
 import umi from "../assets/umi.jpeg";
-import ateu from "../assets/ateu.jpeg";
+import ateu2 from "../assets/ateu2.jpeg";
 import fitri from "../assets/fitri.jpeg";
 import dea from "../assets/dea.jpeg";
 import eca from "../assets/eca.jpeg";
@@ -154,7 +154,7 @@ const overlayTimeline = [
 
 const overlayFacilitators = [
   {
-    avatar: ateu,
+    avatar: ateu2,
     name: "Nurlina Rahmawati, S.P.",
     role: "Founder",
     bio: "Mengkoordinasi sistem pendaftaran, program dan aktivitas.",
@@ -165,6 +165,7 @@ const overlayFacilitators = [
     role: "Co-Founder",
     bio: "Membimbing eksplorasi sensorik dan pelajaran riil di dalam dan di luar ruang.",
   },
+
   {
     avatar: nanda,
     name: "Nanda Azzahra, S.Tr.I.Kom.",
@@ -335,6 +336,7 @@ export default function HomePage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [chatTyping, setChatTyping] = useState(false);
+  const messageIdRef = useRef(1);
 
   const faqBot = [
     { keywords: ["biaya", "harga", "bayar"], answer: "💰 Biaya kegiatan Kidsland Membumi berkisar Rp35.000–Rp40.000 per sesi." },
@@ -348,7 +350,12 @@ export default function HomePage() {
 
   const sendChat = (text: string) => {
     if (!text.trim()) return;
-    const userMsg: ChatMessage = { id: Date.now(), from: "user", text: text.trim(), time: nowTime() };
+    const userMsg: ChatMessage = {
+      id: messageIdRef.current++,
+      from: "user",
+      text: text.trim(),
+      time: nowTime(),
+    };
     setChatMessages((s) => [...s, userMsg]);
     setChatInput("");
     setChatTyping(true);
@@ -358,7 +365,12 @@ export default function HomePage() {
       const lc = text.toLowerCase();
       const found = faqBot.find((f) => f.keywords.some((k) => lc.includes(k)));
       const reply = found ? found.answer : "Maaf, BotMembumi belum bisa menjawab itu. Silakan hubungi kami via WhatsApp.";
-      const botMsg: ChatMessage = { id: Date.now() + 1, from: "bot", text: reply, time: nowTime() };
+      const botMsg: ChatMessage = {
+        id: messageIdRef.current++,
+        from: "bot",
+        text: reply,
+        time: nowTime(),
+      };
       setChatTyping(false);
       setChatMessages((s) => [...s, botMsg]);
     }, 900);

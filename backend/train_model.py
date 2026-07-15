@@ -4,7 +4,7 @@ import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Load dataset
-df = pd.read_csv('Dataset_Kidsland_Skripsi_Final.csv', sep=';')
+df = pd.read_csv('Kidsland_Dataset_Fiks.csv', sep=';')
 
 # Gunakan fungsi cleaning yang sama dengan di preprocessing.py
 def cleaning(text):

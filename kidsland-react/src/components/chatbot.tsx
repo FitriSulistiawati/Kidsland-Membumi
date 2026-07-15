@@ -6,7 +6,9 @@ type Message = {
   waLink?: string;
 };
 
-const CHATBOT_API_URL = import.meta.env.VITE_CHATBOT_API_URL || "https://kidsland-membumi-production.up.railway.app/chat";
+const CHATBOT_API_URL =
+  import.meta.env.VITE_CHATBOT_API_URL ||
+  (import.meta.env.DEV ? "http://127.0.0.1:5000/chat" : "https://kidsland-membumi-production.up.railway.app/chat");
 const WHATSAPP_FALLBACK_LINK = import.meta.env.VITE_WHATSAPP_ADMIN_LINK || "https://wa.me/6285117568551";
 
 export default function Chatbot() {

@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 csv_path = os.path.join(
     BASE_DIR,
-    "Dataset_Kidsland_Skripsi_Final.csv"
+    "Kidsland_Dataset_Fiks.csv"
 )
 
 print(csv_path)

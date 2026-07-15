@@ -4,7 +4,12 @@ from psycopg2.extras import RealDictCursor
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from chatbot import get_response
-from gemini_helper import generate_activity_recommendation
+
+try:
+    from gemini_helper import generate_activity_recommendation
+except Exception:
+    def generate_activity_recommendation(_user_message, _fallback):
+        return _fallback
 
 app = Flask(__name__)
 CORS(app)
