@@ -38,51 +38,71 @@ def _load_dataset():
     if not os.path.exists(DATASET_PATH):
         raise FileNotFoundError(f"Dataset tidak ditemukan: {DATASET_PATH}")
 
-    with open(DATASET_PATH, "r", encoding="utf-8-sig") as handle:
-        lines = [line.rstrip("\r\n") for line in handle if line.strip()]
+    try:
+        with open(DATASET_PATH, "r", encoding="utf-8-sig") as handle:
+            lines = [line.rstrip("\r\n") for line in handle if line.strip()]
 
-    if not lines:
-        raise ValueError("Dataset kosong")
+        if not lines:
+            raise ValueError("Dataset kosong")
 
-    header = [col.strip().strip('"').lower() for col in lines[0].strip().strip('"').split("\t") if col.strip()]
-    rows = []
+        rows = []
+        for raw_line in lines:
+            line = raw_line.strip()
+            if line.startswith('"') and line.endswith('"'):
+                line = line[1:-1]
+            parts = [part.strip().strip('"') for part in line.split("\t")]
+            rows.append(parts)
 
-    for raw_line in lines[1:]:
-        line = raw_line.strip().strip('"')
-        parts = [part.strip().strip('"') for part in line.split("\t")]
+        header = [col.strip().strip('"').lower() for col in rows[0]]
+        data_rows = []
+        for parts in rows[1:]:
+            if len(parts) < len(header):
+                parts = parts + [""] * (len(header) - len(parts))
+            elif len(parts) > len(header):
+                parts = parts[: len(header) - 1] + ["\t".join(parts[len(header) - 1 :])]
+            data_rows.append(parts)
 
-        if len(parts) < len(header):
-            parts.extend([""] * (len(header) - len(parts)))
-        elif len(parts) > len(header):
-            parts = parts[: len(header) - 1] + ["\t".join(parts[len(header) - 1 :])]
+        df = pd.DataFrame(data_rows, columns=header)
+    except Exception:
+        df = pd.DataFrame()
 
-        rows.append({header[idx]: parts[idx] if idx < len(parts) else "" for idx in range(len(header))})
-
-    df = pd.DataFrame(rows)
+    if not df.empty:
+        first_row = df.iloc[0].astype(str).str.strip().tolist()
+        if first_row and first_row[0].startswith('"'):
+            first_row = [value.strip().strip('"') for value in first_row]
+        if len(first_row) >= len(header) and first_row == [value.strip().strip('"') for value in header]:
+            df = df.iloc[1:].copy()
 
     print("Kolom dataset:")
     print(df.columns.tolist())
     print(df.head())
-    
+
     if df.empty:
         return df
 
-    rename_map = {}
+    cleaned_columns = []
     for col in df.columns:
-        low = str(col).lower().strip()
-        if "pertanyaan" in low:
-            rename_map[col] = "pertanyaan"
-        elif "jawaban" in low:
-            rename_map[col] = "jawaban"
-        elif "intent" in low:
-            rename_map[col] = "intent"
+        cleaned = str(col).strip().strip('"').strip().lower()
+        if "pertanyaan" in cleaned:
+            cleaned_columns.append("pertanyaan")
+        elif "jawaban" in cleaned:
+            cleaned_columns.append("jawaban")
+        elif "intent" in cleaned:
+            cleaned_columns.append("intent")
+        else:
+            cleaned_columns.append(cleaned)
 
-    if rename_map:
-        df = df.rename(columns=rename_map)
+    df.columns = cleaned_columns
 
     for col in ["pertanyaan", "jawaban", "intent"]:
         if col not in df.columns:
             df[col] = ""
+
+    if df.columns.duplicated().any():
+        df = df.loc[:, ~df.columns.duplicated()]
+
+    if "pertanyaan" in df.columns and "jawaban" in df.columns:
+        df = df[[col for col in ["id", "pertanyaan", "jawaban", "intent"] if col in df.columns]]
 
     if "id" not in df.columns:
         df["id"] = range(1, len(df) + 1)
@@ -163,6 +183,8 @@ def stopword_removal(text):
     return " ".join(hasil)
 
 def preprocess(text):
+    if isinstance(text, pd.Series):
+        text = text.iloc[0] if not text.empty else ""
     text = cleaning(text)
     text = case_folding(text)
     text = normalize_text(text)
@@ -175,7 +197,7 @@ def build_index():
     if df.empty:
         return df, None, None
 
-    data = df[["pertanyaan", "jawaban", "intent"]].copy()
+    data = df[[col for col in ["pertanyaan", "jawaban", "intent"] if col in df.columns]].copy()
     data["processed"] = data["pertanyaan"].fillna("").astype(str).apply(preprocess)
 
     vectorizer = TfidfVectorizer(ngram_range=(1, 2), min_df=2)
@@ -184,6 +206,27 @@ def build_index():
 
 def is_whatsapp_topic(text):
     return any(keyword in text for keyword in WA_KEYWORDS)
+
+
+def keyword_fallback(user_input, data):
+    text = preprocess(user_input or "")
+    if not text:
+        return None
+
+    lowered = text.lower()
+
+    if "biaya" in lowered or "harga" in lowered or "tarif" in lowered:
+        return data[data["intent"].astype(str).str.upper() == "BIAYA"].iloc[0] if not data.empty else None
+    if "lokasi" in lowered or "alamat" in lowered or "dimana" in lowered:
+        return data[data["intent"].astype(str).str.upper() == "LOKASI"].iloc[0] if not data.empty else None
+    if "usia" in lowered or "umur" in lowered or "anak" in lowered:
+        return data[data["intent"].astype(str).str.upper() == "USIA"].iloc[0] if not data.empty else None
+    if "jadwal" in lowered or "kapan" in lowered or "hari" in lowered:
+        return data[data["intent"].astype(str).str.upper() == "JADWAL"].iloc[0] if not data.empty else None
+    if "program" in lowered or "kelas" in lowered:
+        return data[data["intent"].astype(str).str.upper() == "PROGRAM"].iloc[0] if not data.empty else None
+    return None
+
 
 def get_response(user_input):
     data, vectorizer, tfidf_matrix = build_index()
@@ -197,7 +240,13 @@ def get_response(user_input):
     best_match = int(similarity.argmax())
     best_score = float(similarity.max())
 
-    if best_score < 0.30:
+    row = None
+    if best_score >= 0.05:
+        row = data.iloc[best_match]
+    else:
+        row = keyword_fallback(user_input, data)
+
+    if row is None:
         if is_whatsapp_topic(processed_input):
             return {
                 "jawaban": "Untuk informasi atau pemesanan kelas privat, silakan hubungi admin WhatsApp kami.",
@@ -208,8 +257,6 @@ def get_response(user_input):
             "jawaban": "Maaf kak, pertanyaan tersebut belum tersedia di database Kidsland Membumi.",
             "wa": False,
         }
-
-    row = data.iloc[best_match]
     intent = str(row["intent"]).upper().strip()
 
     if intent in REDIRECT_INTENTS or is_whatsapp_topic(processed_input):
