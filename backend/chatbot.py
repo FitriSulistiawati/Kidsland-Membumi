@@ -10,6 +10,9 @@ DATASET_PATH = os.path.join(BASE_DIR, "Kidsland_Dataset_Fiks.csv")
 ADMIN_WHATSAPP_LINK = "https://wa.me/6285117568551"
 WA_KEYWORDS = {"privat", "private", "booking", "reservasi", "daftar"}
 
+# Daftar kata umum yang akan diabaikan agar sistem tidak salah menebak
+STOPWORDS = {"yang", "untuk", "dari", "dengan", "pada", "karena", "saya", "kak", "min", "halo", "permisi", "apa", "bagaimana", "cocok", "kegiatan", "aktivitas", "ya"}
+
 def _load_dataset():
     if not os.path.exists(DATASET_PATH): 
         return pd.DataFrame()
@@ -17,7 +20,6 @@ def _load_dataset():
         df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
         df.columns = [str(c).strip().lower().replace('"', '') for c in df.columns]
         
-        # Mencegah tabrakan antara kolom 'kategori_pertanyaan' dan 'pertanyaan'
         if 'kategori_pertanyaan' in df.columns:
             df = df.drop(columns=['kategori_pertanyaan'])
             
@@ -28,8 +30,6 @@ def _load_dataset():
             elif "intent" in c: cols_map[c] = "intent"
             
         df = df.rename(columns=cols_map)
-        
-        # Membuang duplikat nama kolom jika masih ada
         df = df.loc[:, ~df.columns.duplicated()] 
         
         for col in ["pertanyaan", "jawaban", "intent"]:
@@ -43,7 +43,10 @@ def preprocess(text):
     if pd.isna(text): return ""
     text = str(text).lower()
     text = re.sub(r"[^\w\s]", " ", text)
-    return text.strip()
+    words = text.split()
+    # Hapus kata-kata umum agar AI fokus pada inti (misal: "kardus", "menggambar", "air")
+    words = [w for w in words if w not in STOPWORDS]
+    return " ".join(words)
 
 @lru_cache(maxsize=1)
 def build_index():
@@ -51,6 +54,7 @@ def build_index():
     if df.empty: 
         return df, None, None
     df["processed"] = df["pertanyaan"].apply(preprocess)
+    # min_df=1 memastikan kata unik (seperti "menggambar") tidak dibuang
     vec = TfidfVectorizer(ngram_range=(1, 2), min_df=1)
     mat = vec.fit_transform(df["processed"])
     return df, vec, mat
@@ -61,44 +65,31 @@ def get_response(user_input):
         return {"jawaban": "Maaf kak, dataset belum tersedia.", "wa": False}
 
     proc_in = preprocess(user_input)
+    raw_in = str(user_input).lower().strip()
     
-    if any(k in proc_in for k in WA_KEYWORDS):
+    if any(k in raw_in for k in WA_KEYWORDS):
         return {
             "jawaban": "Untuk informasi kelas privat, silakan hubungi admin WhatsApp kami.",
             "intent": "PRIVAT", "wa": True, "link": ADMIN_WHATSAPP_LINK
         }
 
-    # 1. METODE IRISAN KATA (Membaca CSV dengan jaminan 100% akurat)
-    user_words = set(proc_in.split())
-    best_match = None
-    max_overlap = 0
-    
-    for _, row in data.iterrows():
-        q_words = set(str(row["processed"]).split())
-        overlap = len(user_words.intersection(q_words))
-        if overlap > max_overlap:
-            max_overlap = overlap
-            best_match = row
-
-    if max_overlap >= 2 and best_match is not None:
-        return {
-            "jawaban": str(best_match["jawaban"]), 
-            "intent": str(best_match["intent"]).upper(), 
-            "wa": False
-        }
-
-    # 2. METODE TF-IDF
-    if vectorizer is not None:
-        sim = cosine_similarity(vectorizer.transform([proc_in]), tfidf_matrix)
-        if sim.max() >= 0.05:
-            row = data.iloc[sim.argmax()]
+    # Penilaian kecocokan menggunakan TF-IDF
+    if vectorizer is not None and proc_in.strip() != "":
+        user_vec = vectorizer.transform([proc_in])
+        sim = cosine_similarity(user_vec, tfidf_matrix)
+        best_score = sim.max()
+        
+        # Angka 0.3 artinya kemiripan harus cukup tinggi agar dijawab oleh dataset
+        if best_score > 0.3: 
+            best_match_idx = sim.argmax()
+            row = data.iloc[best_match_idx]
             return {
                 "jawaban": str(row["jawaban"]), 
                 "intent": str(row["intent"]).upper(), 
                 "wa": False
             }
 
-    # 3. JARING PENGAMAN
+    # Jika tidak mencapai 0.3 (tidak ada di dataset), lempar ke AI
     return {
         "intent": "FALLBACK_AI",
         "jawaban": "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!",
