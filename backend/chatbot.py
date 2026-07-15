@@ -42,15 +42,8 @@ def _load_dataset():
         with open(DATASET_PATH, "r", encoding="utf-8-sig") as handle:
             lines = [line.rstrip("\r\n") for line in handle if line.strip()]
 
-<<<<<<< HEAD
-csv_path = os.path.join(
-    BASE_DIR,
-    "Kidsland_Dataset_fiks.csv"
-)
-=======
         if not lines:
             raise ValueError("Dataset kosong")
->>>>>>> 37156fb8d4fe36c6c0bcbe4c0a68e5d5fa88f3da
 
         rows = []
         for raw_line in lines:
@@ -214,7 +207,6 @@ def build_index():
 def is_whatsapp_topic(text):
     return any(keyword in text for keyword in WA_KEYWORDS)
 
-
 def keyword_fallback(user_input, data):
     text = preprocess(user_input or "")
     if not text:
@@ -233,7 +225,6 @@ def keyword_fallback(user_input, data):
     if "program" in lowered or "kelas" in lowered:
         return data[data["intent"].astype(str).str.upper() == "PROGRAM"].iloc[0] if not data.empty else None
     return None
-
 
 def get_response(user_input):
     data, vectorizer, tfidf_matrix = build_index()
