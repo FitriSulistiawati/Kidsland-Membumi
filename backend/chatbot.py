@@ -216,7 +216,7 @@ def keyword_fallback(user_input, data):
         return data[data["intent"].astype(str).str.upper() == "BIAYA"].iloc[0] if not data.empty else None
     if "lokasi" in lowered or "alamat" in lowered or "dimana" in lowered:
         return data[data["intent"].astype(str).str.upper() == "LOKASI"].iloc[0] if not data.empty else None
-    if "usia" in lowered or "umur" in lowered or "anak" in lowered:
+    if "usia" in lowered or "umur" in lowered:
         return data[data["intent"].astype(str).str.upper() == "USIA"].iloc[0] if not data.empty else None
     if "jadwal" in lowered or "kapan" in lowered or "hari" in lowered:
         return data[data["intent"].astype(str).str.upper() == "JADWAL"].iloc[0] if not data.empty else None
