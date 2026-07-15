@@ -79,8 +79,8 @@ def get_response(user_input):
         sim = cosine_similarity(user_vec, tfidf_matrix)
         best_score = sim.max()
         
-        # Angka 0.3 artinya kemiripan harus cukup tinggi agar dijawab oleh dataset
-        if best_score > 0.3: 
+        # UBAH ANGKA 0.3 MENJADI 0.6
+        if best_score > 0.6: 
             best_match_idx = sim.argmax()
             row = data.iloc[best_match_idx]
             return {
@@ -89,7 +89,7 @@ def get_response(user_input):
                 "wa": False
             }
 
-    # Jika tidak mencapai 0.3 (tidak ada di dataset), lempar ke AI
+    # Jika kemiripan di bawah 60% (0.6), buang ke AI
     return {
         "intent": "FALLBACK_AI",
         "jawaban": "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!",
