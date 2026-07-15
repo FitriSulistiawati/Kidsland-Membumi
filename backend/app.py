@@ -26,11 +26,13 @@ def chat():
         try:
             from gemini_helper import generate_activity_recommendation
             ai_answer = generate_activity_recommendation(user_message, result["jawaban"])
-            result["jawaban"] = ai_answer
+            # Hanya gunakan jawaban AI jika berhasil dan tidak kosong
+            if ai_answer:
+                result["jawaban"] = ai_answer
         except Exception as e:
-            print(f"Error Gemini: {e}")
-            traceback.print_exc()
-            result["jawaban"] = "Maaf kak, pertanyaan ini belum ada di sistem dan AI sedang sibuk. Silakan hubungi admin via WhatsApp."
+            # Jika API Gemini gagal (termasuk Error 403), kembalikan jawaban aman
+            print(f"Error AI: {e}")
+            result["jawaban"] = "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!"
             
         result["intent"] = "UMUM"
         

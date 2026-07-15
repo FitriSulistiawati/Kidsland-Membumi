@@ -160,46 +160,51 @@ def keyword_fallback(user_input, data):
 def get_response(user_input):
     data, vectorizer, tfidf_matrix = build_index()
 
-    if data.empty or vectorizer is None or tfidf_matrix is None:
+    if data.empty:
         return {"jawaban": "Maaf kak, dataset belum tersedia.", "wa": False}
 
     processed_input = preprocess(user_input or "")
-    user_vector = vectorizer.transform([processed_input])
-    similarity = cosine_similarity(user_vector, tfidf_matrix)
-    best_match = int(similarity.argmax())
-    best_score = float(similarity.max())
+    
+    # 1. LAPISAN PENCEGATAN MUTLAK (EXACT & SUBSTRING MATCH)
+    # Jika input pengguna persis sama atau merupakan bagian dari CSV, langsung jawab.
+    for idx, row in data.iterrows():
+        q_csv = str(row["pertanyaan"]).lower().strip()
+        q_processed = preprocess(q_csv)
+        if processed_input == q_processed or (len(processed_input) > 10 and processed_input in q_processed):
+            intent = str(row["intent"]).upper().strip()
+            if intent in REDIRECT_INTENTS or is_whatsapp_topic(processed_input):
+                return {"jawaban": row["jawaban"], "intent": intent, "wa": True, "link": ADMIN_WHATSAPP_LINK}
+            return {"jawaban": row["jawaban"], "intent": intent, "wa": False}
 
-    row = None
-    if best_score >= 0.01:
-        row = data.iloc[best_match]
-    else:
-        row = keyword_fallback(user_input, data)
+    # 2. LAPISAN KEMIRIPAN (TF-IDF) UNTUK VARIASI KALIMAT TYPO
+    if vectorizer is not None and tfidf_matrix is not None:
+        user_vector = vectorizer.transform([processed_input])
+        similarity = cosine_similarity(user_vector, tfidf_matrix)
+        best_match = int(similarity.argmax())
+        best_score = float(similarity.max())
 
-    if row is None:
-        if is_whatsapp_topic(processed_input):
-            return {
-                "jawaban": "Untuk informasi atau pemesanan kelas privat, silakan hubungi admin WhatsApp kami.",
-                "wa": True,
-                "link": ADMIN_WHATSAPP_LINK,
-            }
+        row = None
+        if best_score >= 0.05:
+            row = data.iloc[best_match]
+        else:
+            row = keyword_fallback(user_input, data)
+
+        if row is not None:
+            intent = str(row["intent"]).upper().strip()
+            if intent in REDIRECT_INTENTS or is_whatsapp_topic(processed_input):
+                return {"jawaban": row["jawaban"], "intent": intent, "wa": True, "link": ADMIN_WHATSAPP_LINK}
+            return {"jawaban": row["jawaban"], "intent": intent, "wa": False}
+
+    # 3. JARING PENGAMAN (FALLBACK)
+    if is_whatsapp_topic(processed_input):
         return {
-            "intent": "FALLBACK_AI",
-            "jawaban": "Tunggu sebentar ya kak, sedang mencari referensi terbaik...",
-            "wa": False,
-        }
-
-    intent = str(row["intent"]).upper().strip()
-
-    if intent in REDIRECT_INTENTS or is_whatsapp_topic(processed_input):
-        return {
-            "jawaban": row["jawaban"],
-            "intent": intent,
+            "jawaban": "Untuk informasi atau pemesanan kelas privat, silakan hubungi admin WhatsApp kami.",
             "wa": True,
             "link": ADMIN_WHATSAPP_LINK,
         }
-
+        
     return {
-        "jawaban": row["jawaban"],
-        "intent": intent,
+        "intent": "FALLBACK_AI",
+        "jawaban": "Maaf kak, referensi kegiatan tersebut belum ada di database Kidsland.",
         "wa": False,
     }
