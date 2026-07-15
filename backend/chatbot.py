@@ -39,7 +39,6 @@ def _load_dataset():
         raise FileNotFoundError(f"Dataset tidak ditemukan: {DATASET_PATH}")
 
     try:
-        # Pandas akan langsung memproses file dengan pemisah titik koma (;)
         df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
     except Exception:
         return pd.DataFrame()
@@ -47,7 +46,6 @@ def _load_dataset():
     if df.empty:
         return df
 
-    # Normalisasi nama kolom
     cleaned_columns = []
     for col in df.columns:
         cleaned = str(col).strip().strip('"').strip().lower()
@@ -62,7 +60,6 @@ def _load_dataset():
 
     df.columns = cleaned_columns
 
-    # Pastikan kolom wajib tersedia
     for col in ["pertanyaan", "jawaban", "intent"]:
         if col not in df.columns:
             df[col] = ""
@@ -72,35 +69,6 @@ def _load_dataset():
 
     cols_to_keep = [col for col in ["id", "pertanyaan", "jawaban", "intent"] if col in df.columns]
     df = df[cols_to_keep]
-
-    if "id" not in df.columns:
-        df["id"] = range(1, len(df) + 1)
-
-    return df
-
-    cleaned_columns = []
-    for col in df.columns:
-        cleaned = str(col).strip().strip('"').strip().lower()
-        if "pertanyaan" in cleaned:
-            cleaned_columns.append("pertanyaan")
-        elif "jawaban" in cleaned:
-            cleaned_columns.append("jawaban")
-        elif "intent" in cleaned:
-            cleaned_columns.append("intent")
-        else:
-            cleaned_columns.append(cleaned)
-
-    df.columns = cleaned_columns
-
-    for col in ["pertanyaan", "jawaban", "intent"]:
-        if col not in df.columns:
-            df[col] = ""
-
-    if df.columns.duplicated().any():
-        df = df.loc[:, ~df.columns.duplicated()]
-
-    if "pertanyaan" in df.columns and "jawaban" in df.columns:
-        df = df[[col for col in ["id", "pertanyaan", "jawaban", "intent"] if col in df.columns]]
 
     if "id" not in df.columns:
         df["id"] = range(1, len(df) + 1)
@@ -122,47 +90,16 @@ def case_folding(text):
     return text.lower()
 
 normalisasi = {
-    "yg": "yang",
-    "utk": "untuk",
-    "dr": "dari",
-    "dgn": "dengan",
-    "pd": "pada",
-    "krn": "karena",
-    "sdh": "sudah",
-    "blm": "belum",
-    "jg": "juga",
-    "aja": "saja",
-    "brp": "berapa",
-    "gmn": "bagaimana",
-    "knp": "kenapa",
-    "bgmn": "bagaimana",
-    "dmn": "dimana",
-    "dmna": "dimana",
-    "jdwl": "jadwal",
-    "jadwl": "jadwal",
-    "kls": "kelas",
-    "kelass": "kelas",
-    "ank": "anak",
-    "ankk": "anak",
-    "ortu": "orang tua",
-    "orangtua": "orang tua",
-    "umr": "umur",
-    "byr": "bayar",
-    "byaya": "biaya",
-    "biayaa": "biaya",
-    "hrg": "harga",
-    "kidslnd": "kidsland",
-    "kidslandd": "kidsland",
-    "yaa": "ya",
-    "iyaa": "iya",
-    "tdk": "tidak",
-    "gk": "tidak",
-    "ga": "tidak",
-    "nggak": "tidak",
-    "programnya": "program",
-    "kelasnya": "kelas",
-    "biayanya": "biaya",
-    "jadwalnya": "jadwal",
+    "yg": "yang", "utk": "untuk", "dr": "dari", "dgn": "dengan", "pd": "pada",
+    "krn": "karena", "sdh": "sudah", "blm": "belum", "jg": "juga", "aja": "saja",
+    "brp": "berapa", "gmn": "bagaimana", "knp": "kenapa", "bgmn": "bagaimana",
+    "dmn": "dimana", "dmna": "dimana", "jdwl": "jadwal", "jadwl": "jadwal",
+    "kls": "kelas", "kelass": "kelas", "ank": "anak", "ankk": "anak",
+    "ortu": "orang tua", "orangtua": "orang tua", "umr": "umur", "byr": "bayar",
+    "byaya": "biaya", "biayaa": "biaya", "hrg": "harga", "kidslnd": "kidsland",
+    "kidslandd": "kidsland", "yaa": "ya", "iyaa": "iya", "tdk": "tidak",
+    "gk": "tidak", "ga": "tidak", "nggak": "tidak", "programnya": "program",
+    "kelasnya": "kelas", "biayanya": "biaya", "jadwalnya": "jadwal",
 }
 
 def normalize_text(text):
@@ -249,10 +186,13 @@ def get_response(user_input):
                 "wa": True,
                 "link": ADMIN_WHATSAPP_LINK,
             }
+        # Meneruskan pertanyaan bebas ke AI
         return {
-            "jawaban": "Maaf kak, pertanyaan tersebut belum tersedia di database Kidsland Membumi.",
+            "intent": "REKOMENDASI",
+            "jawaban": "Sedang memproses...",
             "wa": False,
         }
+
     intent = str(row["intent"]).upper().strip()
 
     if intent in REDIRECT_INTENTS or is_whatsapp_topic(processed_input):
