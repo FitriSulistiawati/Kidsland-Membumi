@@ -1,210 +1,96 @@
 import os
 import re
-from functools import lru_cache
-
-import nltk
 import pandas as pd
-from nltk.corpus import stopwords
+from functools import lru_cache
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_PATH = os.path.join(BASE_DIR, "Kidsland_Dataset_Fiks.csv")
-
 ADMIN_WHATSAPP_LINK = "https://wa.me/6285117568551"
-REDIRECT_INTENTS = {"PRIVAT"}
-WA_KEYWORDS = {
-    "privat", "kelas privat", "private", "booking privat", 
-    "daftar privat", "reservasi privat",
-}
-
-def _ensure_stopwords():
-    try:
-        return set(stopwords.words("indonesian"))
-    except LookupError:
-        try:
-            nltk.download("stopwords", quiet=True)
-        except Exception:
-            pass
-        return set(stopwords.words("indonesian"))
-
-STOP_WORDS = _ensure_stopwords()
+WA_KEYWORDS = {"privat", "private", "booking", "reservasi"}
 
 def _load_dataset():
-    if not os.path.exists(DATASET_PATH):
+    if not os.path.exists(DATASET_PATH): 
         return pd.DataFrame()
-
     try:
         df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
-    except Exception:
+        # Bersihkan nama kolom dari spasi atau tanda kutip
+        df.columns = [str(c).strip().lower().replace('"', '') for c in df.columns]
+        cols_map = {}
+        for c in df.columns:
+            if "pertanyaan" in c: cols_map[c] = "pertanyaan"
+            elif "jawaban" in c: cols_map[c] = "jawaban"
+            elif "intent" in c: cols_map[c] = "intent"
+        df = df.rename(columns=cols_map)
+        return df[["pertanyaan", "jawaban", "intent"]].dropna(subset=["pertanyaan"])
+    except: 
         return pd.DataFrame()
 
-    if df.empty:
-        return df
-
-    cleaned_columns = []
-    for col in df.columns:
-        cleaned = str(col).strip().strip('"').strip().lower()
-        if "pertanyaan" in cleaned:
-            cleaned_columns.append("pertanyaan")
-        elif "jawaban" in cleaned:
-            cleaned_columns.append("jawaban")
-        elif "intent" in cleaned:
-            cleaned_columns.append("intent")
-        else:
-            cleaned_columns.append(cleaned)
-
-    df.columns = cleaned_columns
-
-    for col in ["pertanyaan", "jawaban", "intent"]:
-        if col not in df.columns:
-            df[col] = ""
-
-    if df.columns.duplicated().any():
-        df = df.loc[:, ~df.columns.duplicated()]
-
-    cols_to_keep = [col for col in ["id", "pertanyaan", "jawaban", "intent"] if col in df.columns]
-    df = df[cols_to_keep]
-
-    if "id" not in df.columns:
-        df["id"] = range(1, len(df) + 1)
-
-    return df
-
-@lru_cache(maxsize=1)
-def get_dataset():
-    return _load_dataset()
-
-def cleaning(text):
-    text = str(text or "")
-    text = re.sub(r"[^\w\s]", " ", text)
-    text = re.sub(r"\d+", " ", text)
-    text = re.sub(r"\s+", " ", text)
-    return text.strip()
-
-def case_folding(text):
-    return text.lower()
-
-normalisasi = {
-    "yg": "yang", "utk": "untuk", "dr": "dari", "dgn": "dengan", "pd": "pada",
-    "krn": "karena", "sdh": "sudah", "blm": "belum", "jg": "juga", "aja": "saja",
-    "brp": "berapa", "gmn": "bagaimana", "knp": "kenapa", "bgmn": "bagaimana",
-    "dmn": "dimana", "dmna": "dimana", "jdwl": "jadwal", "jadwl": "jadwal",
-    "kls": "kelas", "kelass": "kelas", "ank": "anak", "ankk": "anak",
-    "ortu": "orang tua", "orangtua": "orang tua", "umr": "umur", "byr": "bayar",
-    "byaya": "biaya", "biayaa": "biaya", "hrg": "harga", "kidslnd": "kidsland",
-    "kidslandd": "kidsland", "yaa": "ya", "iyaa": "iya", "tdk": "tidak",
-    "gk": "tidak", "ga": "tidak", "nggak": "tidak", "programnya": "program",
-    "kelasnya": "kelas", "biayanya": "biaya", "jadwalnya": "jadwal",
-}
-
-def normalize_text(text):
-    words = text.split()
-    hasil = []
-    for word in words:
-        hasil.append(normalisasi.get(word, word))
-    return " ".join(hasil)
-
-def stopword_removal(text):
-    tokens = text.split()
-    hasil = []
-    for word in tokens:
-        if word not in STOP_WORDS:
-            hasil.append(word)
-    return " ".join(hasil)
-
 def preprocess(text):
-    if isinstance(text, pd.Series):
-        text = text.iloc[0] if not text.empty else ""
-    text = cleaning(text)
-    text = case_folding(text)
-    text = normalize_text(text)
-    text = stopword_removal(text)
-    return text
+    text = str(text or "").lower()
+    text = re.sub(r"[^\w\s]", " ", text)
+    return text.strip()
 
 @lru_cache(maxsize=1)
 def build_index():
-    df = get_dataset()
-    if df.empty:
+    df = _load_dataset()
+    if df.empty: 
         return df, None, None
-
-    data = df[[col for col in ["pertanyaan", "jawaban", "intent"] if col in df.columns]].copy()
-    data["processed"] = data["pertanyaan"].fillna("").astype(str).apply(preprocess)
-
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2), min_df=2)
-    tfidf_matrix = vectorizer.fit_transform(data["processed"])
-    return data, vectorizer, tfidf_matrix
-
-def is_whatsapp_topic(text):
-    return any(keyword in text for keyword in WA_KEYWORDS)
-
-def keyword_fallback(user_input, data):
-    text = preprocess(user_input or "")
-    if not text:
-        return None
-
-    lowered = text.lower()
-
-    if "biaya" in lowered or "harga" in lowered or "tarif" in lowered:
-        return data[data["intent"].astype(str).str.upper() == "BIAYA"].iloc[0] if not data.empty else None
-    if "lokasi" in lowered or "alamat" in lowered or "dimana" in lowered:
-        return data[data["intent"].astype(str).str.upper() == "LOKASI"].iloc[0] if not data.empty else None
-    if "usia" in lowered or "umur" in lowered:
-        return data[data["intent"].astype(str).str.upper() == "USIA"].iloc[0] if not data.empty else None
-    if "jadwal" in lowered or "kapan" in lowered or "hari" in lowered:
-        return data[data["intent"].astype(str).str.upper() == "JADWAL"].iloc[0] if not data.empty else None
-    if "program" in lowered or "kelas" in lowered:
-        return data[data["intent"].astype(str).str.upper() == "PROGRAM"].iloc[0] if not data.empty else None
-    return None
+    df["processed"] = df["pertanyaan"].apply(preprocess)
+    # min_df=1 memastikan tidak ada kata yang dibuang oleh sistem
+    vec = TfidfVectorizer(ngram_range=(1, 2), min_df=1)
+    mat = vec.fit_transform(df["processed"])
+    return df, vec, mat
 
 def get_response(user_input):
     data, vectorizer, tfidf_matrix = build_index()
-
     if data.empty:
         return {"jawaban": "Maaf kak, dataset belum tersedia.", "wa": False}
 
-    processed_input = preprocess(user_input or "")
+    proc_in = preprocess(user_input)
     
-    # 1. LAPISAN PENCEGATAN MUTLAK (EXACT & SUBSTRING MATCH)
-    # Jika input pengguna persis sama atau merupakan bagian dari CSV, langsung jawab.
-    for idx, row in data.iterrows():
-        q_csv = str(row["pertanyaan"]).lower().strip()
-        q_processed = preprocess(q_csv)
-        if processed_input == q_processed or (len(processed_input) > 10 and processed_input in q_processed):
-            intent = str(row["intent"]).upper().strip()
-            if intent in REDIRECT_INTENTS or is_whatsapp_topic(processed_input):
-                return {"jawaban": row["jawaban"], "intent": intent, "wa": True, "link": ADMIN_WHATSAPP_LINK}
-            return {"jawaban": row["jawaban"], "intent": intent, "wa": False}
-
-    # 2. LAPISAN KEMIRIPAN (TF-IDF) UNTUK VARIASI KALIMAT TYPO
-    if vectorizer is not None and tfidf_matrix is not None:
-        user_vector = vectorizer.transform([processed_input])
-        similarity = cosine_similarity(user_vector, tfidf_matrix)
-        best_match = int(similarity.argmax())
-        best_score = float(similarity.max())
-
-        row = None
-        if best_score >= 0.05:
-            row = data.iloc[best_match]
-        else:
-            row = keyword_fallback(user_input, data)
-
-        if row is not None:
-            intent = str(row["intent"]).upper().strip()
-            if intent in REDIRECT_INTENTS or is_whatsapp_topic(processed_input):
-                return {"jawaban": row["jawaban"], "intent": intent, "wa": True, "link": ADMIN_WHATSAPP_LINK}
-            return {"jawaban": row["jawaban"], "intent": intent, "wa": False}
-
-    # 3. JARING PENGAMAN (FALLBACK)
-    if is_whatsapp_topic(processed_input):
+    # Deteksi WhatsApp (Privat)
+    if any(k in proc_in for k in WA_KEYWORDS):
         return {
-            "jawaban": "Untuk informasi atau pemesanan kelas privat, silakan hubungi admin WhatsApp kami.",
-            "wa": True,
-            "link": ADMIN_WHATSAPP_LINK,
+            "jawaban": "Untuk informasi kelas privat, silakan hubungi admin WhatsApp kami.",
+            "intent": "PRIVAT", "wa": True, "link": ADMIN_WHATSAPP_LINK
         }
-        
+
+    # 1. METODE IRISAN KATA (Paling Ampuh & Tahan Banting)
+    user_words = set(proc_in.split())
+    best_match = None
+    max_overlap = 0
+    
+    for _, row in data.iterrows():
+        q_words = set(str(row["processed"]).split())
+        overlap = len(user_words.intersection(q_words)) # Menghitung kata yang sama
+        if overlap > max_overlap:
+            max_overlap = overlap
+            best_match = row
+
+    # Jika minimal ada 2 kata yang cocok (contoh: "anak" & "air" / "suka" & "gambar")
+    if max_overlap >= 2 and best_match is not None:
+        return {
+            "jawaban": str(best_match["jawaban"]), 
+            "intent": str(best_match["intent"]).upper(), 
+            "wa": False
+        }
+
+    # 2. METODE TF-IDF (Untuk melengkapi irisan kata)
+    if vectorizer:
+        sim = cosine_similarity(vectorizer.transform([proc_in]), tfidf_matrix)
+        if sim.max() >= 0.05:
+            row = data.iloc[sim.argmax()]
+            return {
+                "jawaban": str(row["jawaban"]), 
+                "intent": str(row["intent"]).upper(), 
+                "wa": False
+            }
+
+    # 3. JARING PENGAMAN (LEMPAR KE AI)
     return {
         "intent": "FALLBACK_AI",
-        "jawaban": "Maaf kak, referensi kegiatan tersebut belum ada di database Kidsland.",
+        "jawaban": "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!",
         "wa": False,
     }
