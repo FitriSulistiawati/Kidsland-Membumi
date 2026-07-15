@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 # ==========================
 
 df = pd.read_csv(
-    "Dataset_Kidsland_Skripsi_Final.csv",
+    "Kidsland_Dataset_Fiks.csv",
     sep=';'
 )
 

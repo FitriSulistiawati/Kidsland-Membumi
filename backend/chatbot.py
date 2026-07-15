@@ -9,7 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(BASE_DIR, "Dataset_Kidsland_Skripsi_Final_Fiks.csv")
+DATASET_PATH = os.path.join(BASE_DIR, "Kidsland_Dataset_Fiks.csv")
 
 ADMIN_WHATSAPP_LINK = "https://wa.me/6285117568551"
 REDIRECT_INTENTS = {"PRIVAT"}
