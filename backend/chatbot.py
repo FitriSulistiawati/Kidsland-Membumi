@@ -39,46 +39,44 @@ def _load_dataset():
         raise FileNotFoundError(f"Dataset tidak ditemukan: {DATASET_PATH}")
 
     try:
-        with open(DATASET_PATH, "r", encoding="utf-8-sig") as handle:
-            lines = [line.rstrip("\r\n") for line in handle if line.strip()]
-
-        if not lines:
-            raise ValueError("Dataset kosong")
-
-        rows = []
-        for raw_line in lines:
-            line = raw_line.strip()
-            if line.startswith('"') and line.endswith('"'):
-                line = line[1:-1]
-            parts = [part.strip().strip('"') for part in line.split("\t")]
-            rows.append(parts)
-
-        header = [col.strip().strip('"').lower() for col in rows[0]]
-        data_rows = []
-        for parts in rows[1:]:
-            if len(parts) < len(header):
-                parts = parts + [""] * (len(header) - len(parts))
-            elif len(parts) > len(header):
-                parts = parts[: len(header) - 1] + ["\t".join(parts[len(header) - 1 :])]
-            data_rows.append(parts)
-
-        df = pd.DataFrame(data_rows, columns=header)
+        # Pandas akan langsung memproses file dengan pemisah titik koma (;)
+        df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
     except Exception:
-        df = pd.DataFrame()
-
-    if not df.empty:
-        first_row = df.iloc[0].astype(str).str.strip().tolist()
-        if first_row and first_row[0].startswith('"'):
-            first_row = [value.strip().strip('"') for value in first_row]
-        if len(first_row) >= len(header) and first_row == [value.strip().strip('"') for value in header]:
-            df = df.iloc[1:].copy()
-
-    print("Kolom dataset:")
-    print(df.columns.tolist())
-    print(df.head())
+        return pd.DataFrame()
 
     if df.empty:
         return df
+
+    # Normalisasi nama kolom
+    cleaned_columns = []
+    for col in df.columns:
+        cleaned = str(col).strip().strip('"').strip().lower()
+        if "pertanyaan" in cleaned:
+            cleaned_columns.append("pertanyaan")
+        elif "jawaban" in cleaned:
+            cleaned_columns.append("jawaban")
+        elif "intent" in cleaned:
+            cleaned_columns.append("intent")
+        else:
+            cleaned_columns.append(cleaned)
+
+    df.columns = cleaned_columns
+
+    # Pastikan kolom wajib tersedia
+    for col in ["pertanyaan", "jawaban", "intent"]:
+        if col not in df.columns:
+            df[col] = ""
+
+    if df.columns.duplicated().any():
+        df = df.loc[:, ~df.columns.duplicated()]
+
+    cols_to_keep = [col for col in ["id", "pertanyaan", "jawaban", "intent"] if col in df.columns]
+    df = df[cols_to_keep]
+
+    if "id" not in df.columns:
+        df["id"] = range(1, len(df) + 1)
+
+    return df
 
     cleaned_columns = []
     for col in df.columns:
