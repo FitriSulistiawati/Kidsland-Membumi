@@ -8,14 +8,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_PATH = os.path.join(BASE_DIR, "Kidsland_Dataset_Fiks.csv")
 ADMIN_WHATSAPP_LINK = "https://wa.me/6285117568551"
-WA_KEYWORDS = {"privat", "private", "booking", "reservasi"}
+WA_KEYWORDS = {"privat", "private", "booking", "reservasi", "daftar"}
 
 def _load_dataset():
     if not os.path.exists(DATASET_PATH): 
         return pd.DataFrame()
     try:
         df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
-        # Bersihkan nama kolom dari spasi atau tanda kutip
         df.columns = [str(c).strip().lower().replace('"', '') for c in df.columns]
         cols_map = {}
         for c in df.columns:
@@ -23,6 +22,10 @@ def _load_dataset():
             elif "jawaban" in c: cols_map[c] = "jawaban"
             elif "intent" in c: cols_map[c] = "intent"
         df = df.rename(columns=cols_map)
+        
+        for col in ["pertanyaan", "jawaban", "intent"]:
+            if col not in df.columns: df[col] = ""
+            
         return df[["pertanyaan", "jawaban", "intent"]].dropna(subset=["pertanyaan"])
     except: 
         return pd.DataFrame()
@@ -38,7 +41,7 @@ def build_index():
     if df.empty: 
         return df, None, None
     df["processed"] = df["pertanyaan"].apply(preprocess)
-    # min_df=1 memastikan tidak ada kata yang dibuang oleh sistem
+    # min_df=1 memastikan tidak ada kata yang terlewat
     vec = TfidfVectorizer(ngram_range=(1, 2), min_df=1)
     mat = vec.fit_transform(df["processed"])
     return df, vec, mat
@@ -50,26 +53,25 @@ def get_response(user_input):
 
     proc_in = preprocess(user_input)
     
-    # Deteksi WhatsApp (Privat)
     if any(k in proc_in for k in WA_KEYWORDS):
         return {
             "jawaban": "Untuk informasi kelas privat, silakan hubungi admin WhatsApp kami.",
             "intent": "PRIVAT", "wa": True, "link": ADMIN_WHATSAPP_LINK
         }
 
-    # 1. METODE IRISAN KATA (Paling Ampuh & Tahan Banting)
+    # 1. METODE IRISAN KATA (Paling ampuh untuk membaca dataset CSV)
     user_words = set(proc_in.split())
     best_match = None
     max_overlap = 0
     
     for _, row in data.iterrows():
         q_words = set(str(row["processed"]).split())
-        overlap = len(user_words.intersection(q_words)) # Menghitung kata yang sama
+        overlap = len(user_words.intersection(q_words))
         if overlap > max_overlap:
             max_overlap = overlap
             best_match = row
 
-    # Jika minimal ada 2 kata yang cocok (contoh: "anak" & "air" / "suka" & "gambar")
+    # Asalkan ada minimal 2 kata yang cocok (misal: "suka" & "menggambar")
     if max_overlap >= 2 and best_match is not None:
         return {
             "jawaban": str(best_match["jawaban"]), 
@@ -77,8 +79,8 @@ def get_response(user_input):
             "wa": False
         }
 
-    # 2. METODE TF-IDF (Untuk melengkapi irisan kata)
-    if vectorizer:
+    # 2. METODE TF-IDF (Pelengkap)
+    if vectorizer is not None:
         sim = cosine_similarity(vectorizer.transform([proc_in]), tfidf_matrix)
         if sim.max() >= 0.05:
             row = data.iloc[sim.argmax()]
@@ -88,7 +90,7 @@ def get_response(user_input):
                 "wa": False
             }
 
-    # 3. JARING PENGAMAN (LEMPAR KE AI)
+    # 3. JARING PENGAMAN (AI / Peringatan Default)
     return {
         "intent": "FALLBACK_AI",
         "jawaban": "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!",
