@@ -261,6 +261,13 @@ def get_response(user_input):
             "link": ADMIN_WHATSAPP_LINK
         }
 
+    print("=" * 50)
+    print("ROW TERPILIH:")
+    print(row)
+    print("JAWABAN:", row["jawaban"])
+    print("REKOMENDASI:", row["rekomendasi"])
+    print("=" * 50)
+
     return {
         "jawaban": str(row["jawaban"]),
         "rekomendasi": str(row["rekomendasi"]),

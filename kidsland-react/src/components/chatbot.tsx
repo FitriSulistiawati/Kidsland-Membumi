@@ -56,6 +56,9 @@ export default function Chatbot() {
 
     try {
 
+  console.log("API URL:", CHATBOT_API_URL);
+  console.log("Pesan:", userMessage);
+
       const response = await fetch(
         CHATBOT_API_URL,
         {
