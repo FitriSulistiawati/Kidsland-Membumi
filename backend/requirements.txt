@@ -1,7 +1,8 @@
-Flask
-Flask-Cors
+python-dotenv
+psycopg2-binary
+flask
+flask-cors
 pandas
 scikit-learn
-psycopg2-binary
 google-generativeai
 gunicorn

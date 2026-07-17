@@ -47,8 +47,8 @@ def chat():
 
             # fallback ke dataset jika Gemini error
             result["jawaban"] = result.get(
-                "rekomendasi",
-                result.get("jawaban", "")
+                "jawaban",
+                result.get("rekomendasi", "")
             )
 
     return jsonify(result)
