@@ -246,3 +246,31 @@
     grid-template-columns: 1.4fr 1fr 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    white-space: nowrap;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .site-nav__link {
+    flex-shrink: 0;
+  }
+
+  .site-nav__icons {
+    flex-shrink: 0;
+  }
+}

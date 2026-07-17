@@ -13,39 +13,206 @@ WA_KEYWORDS = {"privat", "private", "booking", "reservasi", "daftar"}
 # Daftar kata umum yang akan diabaikan agar sistem tidak salah menebak
 STOPWORDS = {"yang", "untuk", "dari", "dengan", "pada", "karena", "saya", "kak", "min", "halo", "permisi", "apa", "bagaimana", "cocok", "kegiatan", "aktivitas", "ya"}
 
+normalisasi = {
+    # Umum
+    "yg": "yang",
+    "utk": "untuk",
+    "dr": "dari",
+    "dgn": "dengan",
+    "pd": "pada",
+    "krn": "karena",
+    "sdh": "sudah",
+    "blm": "belum",
+    "jg": "juga",
+    "aja": "saja",
+    "dll": "dan lain lain",
+
+    # Pertanyaan
+    "brp": "berapa",
+    "gmn": "bagaimana",
+    "gmna": "bagaimana",
+    "knp": "kenapa",
+    "apaa": "apa",
+    "bgmn": "bagaimana",
+
+    # Lokasi
+    "dmn": "dimana",
+    "dmna": "dimana",
+    "lok": "lokasi",
+    "alamatny": "alamatnya",
+    "alamatnyaa": "alamatnya",
+
+    # Jadwal
+    "jdwl": "jadwal",
+    "jadwl": "jadwal",
+    "jdwal": "jadwal",
+
+    # Kelas
+    "kls": "kelas",
+    "kels": "kelas",
+    "kelass": "kelas",
+
+    # Anak
+    "ank": "anak",
+    "ankk": "anak",
+    "anaku": "anak",
+    "anakku": "anak",
+
+    # Orang Tua
+    "ortu": "orang tua",
+    "orgtua": "orang tua",
+    "orangtua": "orang tua",
+
+    # Usia
+    "usi": "usia",
+    "usiaa": "usia",
+    "umr": "umur",
+
+    # Pendaftaran
+    "daftarr": "daftar",
+    "daftarin": "daftar",
+    "pendftaran": "pendaftaran",
+    "pendaftarn": "pendaftaran",
+
+    # Biaya
+    "byr": "bayar",
+    "byaya": "biaya",
+    "biayaa": "biaya",
+    "hrg": "harga",
+
+    # Aktivitas
+    "aktivtas": "aktivitas",
+    "aktifitas": "aktivitas",
+    "aktvitas": "aktivitas",
+    "kegiatn": "kegiatan",
+    "kegiatann": "kegiatan",
+
+    # Kidsland
+    "kidslnd": "kidsland",
+    "kidslandd": "kidsland",
+    "kidland": "kidsland",
+
+    # Fasilitator
+    "fasiliator": "fasilitator",
+    "fasilitatr": "fasilitator",
+
+    # Waktu
+    "harii": "hari",
+    "minguu": "minggu",
+    "sabtuu": "sabtu",
+    "mingguu": "minggu",
+
+    # Chat
+    "sy": "saya",
+    "akuu": "aku",
+    "sya": "saya",
+    "sihh": "sih",
+    "nihh": "nih",
+
+    # Ya/Tidak
+    "yaa": "ya",
+    "iy": "iya",
+    "iyaa": "iya",
+    "tdk": "tidak",
+    "gk": "tidak",
+    "ga": "tidak",
+    "nggak": "tidak",
+    "engga": "tidak"
+
+}
+
 def _load_dataset():
-    if not os.path.exists(DATASET_PATH): 
-        return pd.DataFrame()
-    try:
-        df = pd.read_csv(DATASET_PATH, sep=";", encoding="utf-8-sig")
-        df.columns = [str(c).strip().lower().replace('"', '') for c in df.columns]
-        
-        if 'kategori_pertanyaan' in df.columns:
-            df = df.drop(columns=['kategori_pertanyaan'])
-            
-        cols_map = {}
-        for c in df.columns:
-            if "pertanyaan" in c: cols_map[c] = "pertanyaan"
-            elif "jawaban" in c: cols_map[c] = "jawaban"
-            elif "intent" in c: cols_map[c] = "intent"
-            
-        df = df.rename(columns=cols_map)
-        df = df.loc[:, ~df.columns.duplicated()] 
-        
-        for col in ["pertanyaan", "jawaban", "intent"]:
-            if col not in df.columns: df[col] = ""
-            
-        return df[["pertanyaan", "jawaban", "intent"]].dropna(subset=["pertanyaan"])
-    except: 
+    if not os.path.exists(DATASET_PATH):
         return pd.DataFrame()
 
-def preprocess(text):
-    if pd.isna(text): return ""
-    text = str(text).lower()
-    text = re.sub(r"[^\w\s]", " ", text)
+    try:
+        df = pd.read_csv(
+            DATASET_PATH,
+            sep=";",
+            encoding="utf-8-sig"
+        )
+
+        df.columns = [
+            str(c).strip().lower().replace('"', '')
+            for c in df.columns
+        ]
+
+        if "kategori_pertanyaan" in df.columns:
+            df = df.drop(columns=["kategori_pertanyaan"])
+
+        cols_map = {}
+
+        for c in df.columns:
+            if "pertanyaan" in c:
+                cols_map[c] = "pertanyaan"
+
+            elif "jawaban" in c:
+                cols_map[c] = "jawaban"
+
+            elif "intent" in c:
+                cols_map[c] = "intent"
+
+            elif "rekomendasi" in c:
+                cols_map[c] = "rekomendasi"
+
+        df = df.rename(columns=cols_map)
+
+        df = df.loc[:, ~df.columns.duplicated()]
+
+        for col in [
+            "pertanyaan",
+            "jawaban",
+            "intent",
+            "rekomendasi"
+        ]:
+            if col not in df.columns:
+                df[col] = ""
+
+        return df[
+            [
+                "pertanyaan",
+                "jawaban",
+                "intent",
+                "rekomendasi"
+            ]
+        ].dropna(subset=["pertanyaan"])
+
+    except Exception as e:
+        print("Error load dataset:", e)
+        return pd.DataFrame()
+    
+def normalize_text(text):
     words = text.split()
-    # Hapus kata-kata umum agar AI fokus pada inti (misal: "kardus", "menggambar", "air")
-    words = [w for w in words if w not in STOPWORDS]
+    hasil = []
+
+    for word in words:
+        hasil.append(
+            normalisasi.get(word, word)
+        )
+
+    return " ".join(hasil)
+
+def preprocess(text):
+    if pd.isna(text):
+        return ""
+
+    text = str(text).lower()
+
+    text = re.sub(
+        r"[^\w\s]",
+        " ",
+        text
+    )
+
+    text = normalize_text(text)
+
+    words = text.split()
+
+    words = [
+        w for w in words
+        if w not in STOPWORDS
+    ]
+
     return " ".join(words)
 
 @lru_cache(maxsize=1)
@@ -79,18 +246,31 @@ def get_response(user_input):
         sim = cosine_similarity(user_vec, tfidf_matrix)
         best_score = sim.max()
         
-        # UBAH ANGKA 0.3 MENJADI 0.6
-        if best_score > 0.6: 
-            best_match_idx = sim.argmax()
-            row = data.iloc[best_match_idx]
-            return {
-                "jawaban": str(row["jawaban"]), 
-                "intent": str(row["intent"]).upper(), 
-                "wa": False
-            }
+        if best_score >= 0.3:
+
+                best_match_idx = sim.argmax()
+                row = data.iloc[best_match_idx]
+
+                intent = str(row["intent"]).upper()
+
+    if intent == "PRIVAT":
+        return {
+            "jawaban": str(row["jawaban"]),
+            "intent": intent,
+            "wa": True,
+            "link": ADMIN_WHATSAPP_LINK
+        }
+
+    return {
+        "jawaban": str(row["jawaban"]),
+        "rekomendasi": str(row["rekomendasi"]),
+        "intent": intent,
+        "wa": False
+    }
 
     # Jika kemiripan di bawah 60% (0.6), buang ke AI
     return {
+
         "intent": "FALLBACK_AI",
         "jawaban": "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!",
         "wa": False,

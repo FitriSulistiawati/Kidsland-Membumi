@@ -1,8 +1,12 @@
-import google.generativeai as genai
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+import google.generativeai as genai
 
-load_dotenv()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+print("API KEY:", os.getenv("GEMINI_API_KEY"))
 
 genai.configure(
     api_key=os.getenv("GEMINI_API_KEY")
@@ -10,13 +14,11 @@ genai.configure(
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
-print("MODEL YANG DIPAKAI:", "gemini-2.5-flash")
-
 
 def generate_activity_recommendation(
     question,
-    reference_answer
-):
+    reference_answer):
+    print("GEMINI DIPANGGIL")
 
     prompt = f"""
     Kamu adalah fasilitator Kidsland Membumi.

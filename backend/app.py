@@ -20,24 +20,38 @@ def home():
 def chat():
     data = request.get_json()
     user_message = data.get("message", "")
+
     result = get_response(user_message)
-    
-    if result.get("intent") == "FALLBACK_AI":
+
+    print("=" * 50)
+    print("PERTANYAAN :", user_message)
+    print("HASIL TF-IDF :", result)
+    print("=" * 50)
+
+    if result.get("intent") == "REKOMENDASI":
+
         try:
             from gemini_helper import generate_activity_recommendation
-            ai_answer = generate_activity_recommendation(user_message, result["jawaban"])
-            # Hanya gunakan jawaban AI jika berhasil dan tidak kosong
-            if ai_answer:
-                result["jawaban"] = ai_answer
-        except Exception as e:
-            # Jika API Gemini gagal (termasuk Error 403), kembalikan jawaban aman
-            print(f"Error AI: {e}")
-            result["jawaban"] = "Maaf kak, Kidsland belum memiliki rekomendasi untuk hal tersebut. Silakan hubungi admin kami untuk konsultasi lebih lanjut!"
-            
-        result["intent"] = "UMUM"
-        
-    return jsonify(result)
 
+            ai_answer = generate_activity_recommendation(
+                user_message,
+                result.get("rekomendasi", "")
+            )
+
+            if ai_answer:
+                print("JAWABAN GEMINI:", ai_answer)
+                result["jawaban"] = ai_answer
+
+        except Exception as e:
+            print("Gemini Error:", e)
+
+            # fallback ke dataset jika Gemini error
+            result["jawaban"] = result.get(
+                "rekomendasi",
+                result.get("jawaban", "")
+            )
+
+    return jsonify(result)
 @app.route("/pendaftaran", methods=["POST"])
 def pendaftaran():
     data = request.get_json()
